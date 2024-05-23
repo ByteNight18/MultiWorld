@@ -68,7 +68,8 @@
             margin-bottom: 10px;
         }
         .comment-form input[type="text"],
-        .comment-form textarea {
+        .comment-form textarea,
+        .comment-form input[type="file"] {
             width: calc(100% - 40px);
             padding: 10px;
             margin-bottom: 10px;
@@ -130,11 +131,13 @@
             <!-- More posts go here -->
             <div class="comment-form">
                 <h3>Leave a Comment</h3>
-                <form id="commentForm">
+                <form id="commentForm" enctype="multipart/form-data">
                     <label for="name">Name:</label>
                     <input type="text" id="name" name="name" placeholder="Your Name" required><br>
                     <label for="comment">Comment:</label>
                     <textarea id="comment" name="comment" placeholder="Write your comment here..." rows="4" required></textarea><br>
+                    <label for="image">Upload an image (optional):</label>
+                    <input type="file" id="image" name="image"><br>
                     <input type="submit" value="Post Comment">
                 </form>
             </div>
@@ -145,23 +148,24 @@
     </div>
 
     <script>
+        const backendUrl = 'https://your-heroku-app.herokuapp.com';
+
         document.getElementById("commentForm").addEventListener("submit", function(event) {
             event.preventDefault(); // Prevent default form submission
 
             // Get form data
-            var name = document.getElementById("name").value;
-            var comment = document.getElementById("comment").value;
-
-            // Create comment object
-            var commentObject = { name: name, comment: comment };
+            var formData = new FormData();
+            formData.append("name", document.getElementById("name").value);
+            formData.append("comment", document.getElementById("comment").value);
+            var imageFile = document.getElementById("image").files[0];
+            if (imageFile) {
+                formData.append("image", imageFile);
+            }
 
             // Send comment to server
-            fetch('http://localhost:3000/comments', {
+            fetch(`${backendUrl}/comments`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(commentObject)
+                body: formData
             })
             .then(response => response.text())
             .then(data => {
@@ -171,13 +175,14 @@
                 // Clear form fields
                 document.getElementById("name").value = "";
                 document.getElementById("comment").value = "";
+                document.getElementById("image").value = "";
             })
             .catch(error => console.error('Error:', error));
         });
 
         // Function to fetch and display comments
         function fetchComments() {
-            fetch('http://localhost:3000/comments')
+            fetch(`${backendUrl}/comments`)
                 .then(response => response.json())
                 .then(comments => {
                     const commentsSection = document.getElementById("commentsSection");
@@ -188,6 +193,7 @@
                         commentElement.innerHTML = `
                             <h4>${comment.name}</h4>
                             <p class="comment-content">${comment.comment}</p>
+                            ${comment.imageUrl ? `<img src="${comment.imageUrl}" alt="User uploaded image" style="max-width: 100%;">` : ''}
                         `;
                         commentsSection.appendChild(commentElement);
                     });
