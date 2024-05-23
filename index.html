@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiworld by ByteNight Studios</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #000;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        h1, h2, h3 {
+            color: #ff0000;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .content {
+            margin-top: 20px;
+        }
+        .content p {
+            line-height: 1.6;
+        }
+        .coming-soon {
+            background-color: #ff0000;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .news {
+            margin-top: 20px;
+        }
+        .post {
+            background-color: #222;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .post h4 {
+            color: #ff0000;
+            margin-top: 0;
+        }
+        .post-content {
+            color: #ccc;
+            margin-top: 10px;
+        }
+        .comment-form {
+            margin-top: 20px;
+            background-color: #222;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .comment-form label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        .comment-form input[type="text"],
+        .comment-form textarea {
+            width: calc(100% - 40px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: none;
+            background-color: #333;
+            color: #fff;
+            resize: none;
+        }
+        .comment-form input[type="submit"] {
+            background-color: #ff0000;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .comment-form input[type="submit"]:hover {
+            background-color: #d60000;
+        }
+        .comments {
+            margin-top: 20px;
+        }
+        .comment {
+            background-color: #222;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .comment h4 {
+            color: #ff0000;
+            margin-top: 0;
+        }
+        .comment-content {
+            color: #ccc;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Multiworld</h1>
+        <h2>by ByteNight Studios</h2>
+    </header>
+    <div class="container">
+        <div class="content">
+            <h3>About Multiworld</h3>
+            <p>Multiworld is an upcoming indie game being developed by ByteNight Studios. Dive into a world of adventure where you can explore, discover, and embark on epic quests.</p>
+            <div class="coming-soon">
+                <p>Currently in development. Stay tuned for updates!</p>
+            </div>
+        </div>
+        <div class="news">
+            <h3>News & Updates</h3>
+            <div class="post">
+                <h4>Welcome to our New Website!</h4>
+                <p class="post-content">We're excited to announce the launch of our new website for Multiworld. Here, you'll find all the latest updates and news about the game's development. Stay tuned for more!</p>
+            </div>
+            <!-- More posts go here -->
+            <div class="comment-form">
+                <h3>Leave a Comment</h3>
+                <form id="commentForm">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" placeholder="Your Name" required><br>
+                    <label for="comment">Comment:</label>
+                    <textarea id="comment" name="comment" placeholder="Write your comment here..." rows="4" required></textarea><br>
+                    <input type="submit" value="Post Comment">
+                </form>
+            </div>
+            <div class="comments" id="commentsSection">
+                <h3>Comments</h3>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("commentForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            // Get form data
+            var name = document.getElementById("name").value;
+            var comment = document.getElementById("comment").value;
+
+            // Create comment object
+            var commentObject = { name: name, comment: comment };
+
+            // Send comment to server
+            fetch('http://localhost:3000/comments', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(commentObject)
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log(data);
+                // Fetch and display comments
+                fetchComments();
+                // Clear form fields
+                document.getElementById("name").value = "";
+                document.getElementById("comment").value = "";
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        // Function to fetch and display comments
+        function fetchComments() {
+            fetch('http://localhost:3000/comments')
+                .then(response => response.json())
+                .then(comments => {
+                    const commentsSection = document.getElementById("commentsSection");
+                    commentsSection.innerHTML = '<h3>Comments</h3>'; // Clear comments section
+                    comments.forEach(comment => {
+                        const commentElement = document.createElement("div");
+                        commentElement.classList.add("comment");
+                        commentElement.innerHTML = `
+                            <h4>${comment.name}</h4>
+                            <p class="comment-content">${comment.comment}</p>
+                        `;
+                        commentsSection.appendChild(commentElement);
+                    });
+                });
+        }
+
+        // Fetch and display comments on page load
+        fetchComments();
+    </script>
+</body>
+</html>
